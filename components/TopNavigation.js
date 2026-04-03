@@ -1,16 +1,37 @@
-import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Image } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { StyleSheet, View, Text, TouchableOpacity, AppState } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { COLORS, getTheme, Typography, Layout } from '../constants/GlobalStyles';
 import { useRouter } from 'expo-router';
+import { useFocusEffect } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Logo from './Logo';
+
+const CART_KEY = 'cart';
 
 const TopNavigation = ({ activeTab, isDark }) => {
   const insets = useSafeAreaInsets();
   const theme = getTheme(isDark);
   const router = useRouter();
+  const [cartCount, setCartCount] = useState(0);
 
   const isProfileTab = activeTab === 'Profile';
+
+  // Reload cart count every time screen is focused
+  useFocusEffect(
+    useCallback(() => {
+      loadCartCount();
+    }, [])
+  );
+
+  const loadCartCount = async () => {
+    try {
+      const raw = await AsyncStorage.getItem(CART_KEY);
+      const cart = raw ? JSON.parse(raw) : [];
+      setCartCount(cart.length);
+    } catch { setCartCount(0); }
+  };
 
   return (
     <View style={[styles.header, {
@@ -19,52 +40,57 @@ const TopNavigation = ({ activeTab, isDark }) => {
     }]}>
       <View style={styles.content}>
 
-        {/* Left Section: Logo & Brand */}
+        {/* Left Section: Logo */}
         <View style={styles.leftSection}>
           {!isProfileTab && (
-            <View style={styles.logoSection}>
-                          <Image
-                            source={require('../assets/logo.png')}
-                            style={[
-                              styles.logoImage,
-                              { tintColor: '#F2CC0F' }
-                            ]}
-                            resizeMode="contain"
-                          />
-                        </View>
+            <Logo size="small" />
           )}
         </View>
 
         {/* Right Section: Icons */}
         <View style={styles.rightSection}>
 
-          {/* Search Button */}
+          {/* Search */}
           <TouchableOpacity
             style={styles.iconButton}
             activeOpacity={0.7}
-            onPress={() => router.push('/search')}
+            onPress={() => router.push('/(common)/search')}
           >
-            <FontAwesome5 name="search" size={20} color={theme.text} />
+            <Ionicons name="search" size={20} color={theme.text} />
           </TouchableOpacity>
 
-          {/* Notifications Button */}
+          {/* Cart */}
           <TouchableOpacity
-            style={[styles.iconButton, { marginLeft: 15 }]}
+            style={[styles.iconButton, { marginLeft: 14 }]}
             activeOpacity={0.7}
-            onPress={() => router.push('/notifications')}
+            onPress={() => router.push('/(common)/cart')}
           >
-            <Ionicons name="notifications" size={24} color={theme.text} />
+            <Ionicons name="bag-handle" size={22} color={theme.text} />
+            {cartCount > 0 && (
+              <View style={[styles.cartBadge, { borderColor: theme.background }]}>
+                <Text style={styles.cartBadgeText}>{cartCount > 9 ? '9+' : cartCount}</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+
+          {/* Notifications */}
+          <TouchableOpacity
+            style={[styles.iconButton, { marginLeft: 14 }]}
+            activeOpacity={0.7}
+            onPress={() => router.push('/(common)/notifications')}
+          >
+            <Ionicons name="notifications" size={22} color={theme.text} />
             <View style={[styles.redBadge, { borderColor: theme.background }]} />
           </TouchableOpacity>
 
-          {/* Settings Button (Show only on Profile tab) */}
+          {/* Settings (Profile tab only) */}
           {isProfileTab && (
             <TouchableOpacity
-              style={[styles.iconButton, { marginLeft: 15 }]}
+              style={[styles.iconButton, { marginLeft: 14 }]}
               activeOpacity={0.7}
               onPress={() => router.push('/profile/settings')}
             >
-              <Ionicons name="settings-sharp" size={24} color={theme.text} />
+              <Ionicons name="settings-sharp" size={22} color={theme.text} />
             </TouchableOpacity>
           )}
         </View>
@@ -83,24 +109,10 @@ const styles = StyleSheet.create({
     height: 60,
     ...Layout.rowBetween,
     paddingHorizontal: 20,
-
   },
   leftSection: {
     flex: 1.5,
     justifyContent: 'center',
-  },
-  logoSection: {
-    ...Layout.rowCenter,
-  },
-  logoImage: {
-    width: 132,
-    height: 132,
-    marginBottom: -30,
-  },
-  brandName: {
-    ...Typography.h4,
-    fontWeight: '900',
-    letterSpacing: 0.5,
   },
   rightSection: {
     flex: 1,
@@ -115,12 +127,31 @@ const styles = StyleSheet.create({
   redBadge: {
     position: 'absolute',
     top: 4,
-    right: 4,
-    width: 9,
-    height: 9,
-    borderRadius: 4.5,
+    right: 3,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
     backgroundColor: COLORS.ERROR || '#FF3B30',
     borderWidth: 1.5,
+  },
+  cartBadge: {
+    position: 'absolute',
+    top: 0,
+    right: -4,
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: COLORS.PRIMARY_YELLOW,
+    borderWidth: 1.5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 3,
+  },
+  cartBadgeText: {
+    color: COLORS.DARK_BG,
+    fontSize: 9,
+    fontWeight: '900',
+    lineHeight: 12,
   },
 });
 

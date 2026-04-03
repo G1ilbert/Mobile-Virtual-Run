@@ -2,8 +2,8 @@ import React from 'react';
 import { StyleSheet, View, TouchableOpacity, useColorScheme } from 'react-native';
 import { Tabs } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Octicons, FontAwesome5, MaterialIcons, FontAwesome6, FontAwesome } from '@expo/vector-icons';
-import { COLORS, getTheme, Layout } from '../../constants/GlobalStyles';
+import { Octicons, FontAwesome6, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { COLORS, getTheme } from '../../constants/GlobalStyles';
 
 export default function TabLayout() {
   const isDark = useColorScheme() === 'dark';
@@ -16,7 +16,8 @@ export default function TabLayout() {
         headerShown: false,
         tabBarShowLabel: false,
         tabBarActiveTintColor: COLORS.PRIMARY_YELLOW,
-        tabBarInactiveTintColor: theme.textSecondary,
+        tabBarInactiveTintColor: '#666666',
+        tabBarLabelStyle: { fontSize: 10, fontWeight: '600', marginTop: -2 },
         tabBarStyle: {
           position: 'absolute',
           bottom: 0,
@@ -24,11 +25,11 @@ export default function TabLayout() {
           right: 0,
           flexDirection: 'row',
           borderTopWidth: 0.5,
-          paddingTop: 4,
+          paddingTop: 6,
           paddingBottom: insets.bottom > 0 ? insets.bottom : 10,
           backgroundColor: theme.background,
           borderTopColor: theme.border,
-          height: (insets.bottom > 0 ? insets.bottom : 10) + 48,
+          height: (insets.bottom > 0 ? insets.bottom : 10) + 56,
           zIndex: 10,
           elevation: 0,
         },
@@ -37,26 +38,26 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          tabBarIcon: ({ color }) => (
-            <View style={styles.tabItem}>
-              <Octicons name="home-fill" size={22} color={color} />
-            </View>
+          tabBarLabel: 'หน้าแรก',
+          tabBarIcon: ({ color, size }) => (
+            <Octicons name="home-fill" size={(size || 22) - 3}  color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="run"
         options={{
-          tabBarIcon: ({ color }) => (
-            <View style={styles.tabItem}>
-              <FontAwesome5 name="running" size={22} color={color} />
-            </View>
+          tabBarLabel: 'งานวิ่ง',
+          tabBarIcon: ({ color, size }) => (
+            <FontAwesome6 name="heart-pulse" size={(size || 22) - 2} color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="submit"
         options={{
+          tabBarLabel: '',
+          tabBarStyle: { display: 'none' },
           tabBarButton: (props) => (
             <View style={styles.centerButtonWrapper}>
               <TouchableOpacity
@@ -64,7 +65,7 @@ export default function TabLayout() {
                 onPress={props.onPress}
                 activeOpacity={0.8}
               >
-                <FontAwesome name="plus-circle" size={48} color={COLORS.PRIMARY_YELLOW} />
+                <Ionicons name="add-circle" size={50} color={COLORS.PRIMARY_YELLOW} />
               </TouchableOpacity>
             </View>
           ),
@@ -73,20 +74,18 @@ export default function TabLayout() {
       <Tabs.Screen
         name="rank"
         options={{
-          tabBarIcon: ({ color }) => (
-            <View style={styles.tabItem}>
-              <MaterialIcons name="leaderboard" size={22} color={color} />
-            </View>
+          tabBarLabel: 'รอรับของ',
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="package-variant" size={(size || 22) + 2} color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          tabBarIcon: ({ color }) => (
-            <View style={styles.tabItem}>
-              <FontAwesome6 name="user-large" size={22} color={color} />
-            </View>
+          tabBarLabel: 'โปรไฟล์',
+          tabBarIcon: ({ color, size }) => (
+            <FontAwesome6 name="user-large" size={(size || 22) -4} color={color} />
           ),
         }}
       />
@@ -95,11 +94,6 @@ export default function TabLayout() {
 }
 
 const styles = StyleSheet.create({
-  tabItem: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 44,
-  },
   centerButtonWrapper: {
     flex: 1,
     alignItems: 'center',

@@ -5,11 +5,17 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, getTheme, Typography, Layout, Components } from '../../constants/GlobalStyles';
 import TopNavigationBack from '../../components/TopNavigationBack';
+import { useAuth } from '../../contexts/AuthContext';
+import { useAuthGuard } from '../../hooks/useAuthGuard';
 
 export default function SettingsScreen() {
   const isDark = useColorScheme() === 'dark';
   const theme = getTheme(isDark);
   const router = useRouter();
+  const { logout } = useAuth();
+  const { isReady } = useAuthGuard();
+
+  if (!isReady) return null;
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }} edges={['bottom']}>
@@ -37,7 +43,7 @@ export default function SettingsScreen() {
               "Are you sure you want to log out?",
               [
                 { text: "Cancel", style: "cancel" },
-                { text: "Logout", onPress: () => router.back(), style: 'destructive' }
+                { text: "Logout", onPress: async () => { await logout(); router.replace('/(tabs)'); }, style: 'destructive' }
               ]
             )
           }
